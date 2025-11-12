@@ -1,0 +1,19 @@
+1) L'application :
+Carte de seattle avec les rbnb's
+Filtrage de recherche sur les différents appartement:
+	par prix avec des fourchettes
+	par nombre de chambre etc
+	par avis
+	au plus proche
+
+Interaction avec la carte:
+	curseurs sur les points à chaque rbnb et rendre le truc propre
+	pouvoir alterner entre la page de la carte et celle des airbnb et leurs information 1 à 1
+
+attention a bien faire plusieurs graphiques et pas que la carte
+
+
+2)Le compte rendu :
+Déscription des données avec exemples
+grarphique a gogo 
+
