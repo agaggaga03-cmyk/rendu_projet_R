@@ -1,5 +1,6 @@
 library(shiny)
 library(leaflet)
+library(leaflet.extras)  # Pour la heatmap
 library(dplyr)
 
 # Lecture du fichiers csv 
@@ -53,7 +54,7 @@ function(input, output, session) {
   
   
   
-  # Carte
+  # Carte Simple
   output$map <- renderLeaflet({
     
     data_filtered <- airbnb_filtree()
@@ -82,9 +83,9 @@ function(input, output, session) {
     )
     
     # Créer la carte
-    leaflet(data = data_filtered) %>%
-      addTiles() %>%
-      setView(lng = -122.335167, lat = 47.608013, zoom = 11) %>%
+    leaflet(data = data_filtered) |>
+      addTiles() |>
+      setView(lng = -122.335167, lat = 47.608013, zoom = 11) |>
       addCircleMarkers(
         lng = ~longitude,
         lat = ~latitude,
@@ -96,6 +97,37 @@ function(input, output, session) {
         weight = 1,
         popup = popups,
         label = ~name
+      )
+  })
+  
+  #Carte HeatMap
+  
+  # Heatmap en fonction du prix
+  output$heat_map <- renderLeaflet({
+    data_filtered <- airbnb_filtree()
+    
+    # Si aucune donnée, afficher une carte vide avec un message
+    if (nrow(data_filtered) == 0) {
+      return(
+        leaflet() %>%
+          addTiles() %>%
+          setView(lng = -122.335167, lat = 47.608013, zoom = 11) %>%
+          addPopups(lng = -122.335167, lat = 47.608013, 
+                    popup = "Aucune location trouvée dans cette fourchette de prix")
+      )
+    }
+    
+    # Créer la heatmap avec les prix comme intensité
+    leaflet(data = data_filtered) %>%
+      addTiles() %>%
+      setView(lng = -122.335167, lat = 47.608013, zoom = 11) %>%
+      addHeatmap(
+        lng = ~longitude,
+        lat = ~latitude,
+        intensity = ~price,
+        blur = 20,
+        max = 0.05,
+        radius = 15
       )
   })
 }
