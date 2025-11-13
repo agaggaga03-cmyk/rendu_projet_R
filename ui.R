@@ -9,10 +9,13 @@ fluidPage(
   
   sidebarLayout(
     sidebarPanel(
-      fileInput("file", "Charger le fichier CSV",
-                accept = c(".csv")),
+      #Fourchette de prix
+      sliderInput(inputId = "prix",
+                  label = "Fourchette de prix",
+                  min = 15,
+                  max = 5900,
+                  value = c(15,5900)),
       hr(),
-      helpText("Chargez votre fichier CSV contenant les données Airbnb."),
       br(),
       uiOutput("stats")
     ),
