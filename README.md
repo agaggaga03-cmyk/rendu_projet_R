@@ -7,6 +7,8 @@ Pour commencer il est necessaire d'installer les packages suivant :
   - shiny avec la commande install.packages("shiny")
   - leaflet install.packages("shiny")
   - dplyr install.packages("shiny")
+  - bslib install.packages("bslib")
+
 
 ### Pré-requis
 
