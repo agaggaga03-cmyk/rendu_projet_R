@@ -2,28 +2,41 @@ library(shiny)
 library(leaflet)
 library(dplyr)
 
+# Lecture du fichiers csv 
+airbnb_data <- read.csv("seattle.csv", stringsAsFactors = FALSE) %>%
+  filter(!is.na(latitude) & !is.na(longitude)) %>%
+  filter(latitude > 47 & latitude < 48) %>%
+  filter(longitude > -123 & longitude < -122)
+
+
 function(input, output, session) {
-  
-  # Lecture des données
-  airbnb_data <- reactive({
-    req(input$file)
-    
-    # Lire le fichier CSV
-    data <- read.csv("seattle.csv")
-    
-    # Nettoyer et filtrer les données
-    data <- data %>%
-      filter(!is.na(latitude) & !is.na(longitude)) %>%
-      filter(latitude > 47 & latitude < 48) %>%
-      filter(longitude > -123 & longitude < -122)
-    
-    return(data)
+  # on filtre en fonction de la fouchette de prix 
+  airbnb_filtree <- reactive({
+    airbnb_data |>
+      filter(price >= input$prix[1] & price <= input$prix[2])
   })
   
-  # Statistiques
+  # Nombre de locations
+  output$nb_locations <- renderText({
+    paste("Nombre de locations:", nrow(airbnb_filtree()))
+  })
+  
+  # Prix moyen
+  output$prix_moyen <- renderText({
+    paste("Prix moyen: $", round(mean(airbnb_filtree()$price, na.rm = TRUE), 2))
+  })
+  
+  # Table des types de logements
+  output$room_types <- renderTable({
+    room_count <- as.data.frame(table(airbnb_filtree()$room_type))
+    colnames(room_count) <- c("Type", "Nombre")
+    room_count
+  })
+  
+  # statistique
   output$stats <- renderUI({
-    req(airbnb_data())
-    data <- airbnb_data()
+    req(airbnb_filtree())
+    data <- airbnb_filtree()
     
     tagList(
       h4("Statistiques"),
@@ -38,34 +51,40 @@ function(input, output, session) {
     )
   })
   
+  
+  
   # Carte
   output$map <- renderLeaflet({
-    # Carte par défaut centrée sur Seattle
-    leaflet() %>%
-      addTiles() %>%
-      setView(lng = -122.335167, lat = 47.608013, zoom = 11)
-  })
-  
-  # Observer pour mettre à jour la carte avec les données
-  observe({
-    data <- airbnb_data()
-    req(data)
+    
+    data_filtered <- airbnb_filtree()
+    
+    # Si aucune donnée, afficher une carte vide avec un message
+    if (nrow(data_filtered) == 0) {
+      return(
+        leaflet() %>%
+          addTiles() %>%
+          setView(lng = -122.335167, lat = 47.608013, zoom = 11) %>%
+          addPopups(lng = -122.335167, lat = 47.608013, 
+                    popup = "Aucune location trouvée dans cette fourchette de prix")
+      )
+    }
     
     # Créer les popups avec les informations
     popups <- paste0(
-      "<strong>", data$name, "</strong><br/>",
-      "Type: ", data$room_type, "<br/>",
-      "Prix: $", data$price, " ", data$rate_type, "<br/>",
-      "Capacité: ", data$accommodates, " personnes<br/>",
-      "Chambres: ", data$bedrooms, "<br/>",
-      "Note: ", ifelse(!is.na(data$overall_satisfaction), 
-                       data$overall_satisfaction, "Non notée"), "<br/>",
-      "Avis: ", data$reviews
+      "<strong>", data_filtered$name, "</strong><br/>",
+      "Type: ", data_filtered$room_type, "<br/>",
+      "Prix: $", data_filtered$price, " ", data_filtered$rate_type, "<br/>",
+      "Capacité: ", data_filtered$accommodates, " personnes<br/>",
+      "Chambres: ", data_filtered$bedrooms, "<br/>",
+      "Note: ", ifelse(!is.na(data_filtered$overall_satisfaction), 
+                       data_filtered$overall_satisfaction, "Non notée"), "<br/>",
+      "Avis: ", data_filtered$reviews
     )
     
-    # Mettre à jour la carte
-    leafletProxy("map", data = data) %>%
-      clearMarkers() %>%
+    # Créer la carte
+    leaflet(data = data_filtered) %>%
+      addTiles() %>%
+      setView(lng = -122.335167, lat = 47.608013, zoom = 11) %>%
       addCircleMarkers(
         lng = ~longitude,
         lat = ~latitude,
