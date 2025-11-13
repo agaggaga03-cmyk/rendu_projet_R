@@ -1,0 +1,132 @@
+---
+title: "Rapport - ProjetR Utilisation de jeu de donnée sur les appartements à Seattle"
+author: "Amine Halhali Ismail Taaissat Mohammed-Ibrahim Benahmida Anas Imarrighen"
+date: "2025-11-02"
+lang: fr
+fontsize: 11pt
+mainfont: "Times New Roman"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+---
+\newpage
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(ggplot2)
+library(tibble)
+library(tidyr)
+library(dplyr)
+```
+# Introduction
+
+## Contexte de l’étude
+
+Le marché des locations de courte durée via des plateformes comme Airbnb connaît un développement rapide dans les grandes villes. Comprendre les facteurs qui influencent le prix d’une location est essentiel pour les propriétaires souhaitant optimiser leurs revenus, mais aussi pour les voyageurs souhaitant comparer les offres.
+
+## Objectifs 
+
+L'objectif de cette analyse est donc de pouvoir observé le lien de corrélation et/ou de causalité entres les paramétres mis à disposition dans le jeu de donnée. Nous nous attarderons sur les points important comme le prix et les avis comme base pour notre étude afin de bien répondre à la problématique: Quels facteurs influencent le prix d’une location Airbnb ?
+
+# Description du jeu de données
+
+## Variables disponibles 
+
+On compte pas moins de 17 paramétres dans le jeu de données:
+
+  - room_id
+  - host_id
+  - room_type
+  - adress
+  - reviews
+  - overall_satisfaction
+  - accommodates
+  - bedrooms
+  - bathrooms
+  - price
+  - last_modified
+  - latitude
+  - longitude
+  - location
+  - name
+  - currency
+  - rate_type
+
+\newpage
+
+## Description des données
+
+room_id : cet élément représente l'identifiant du rbnb à louer
+
+host_id : cet élément représente l'identifiant de la personne qui loue le rbnb
+
+room_type : cet élément représente le type de rbnb
+
+adress : cet élément représente l'adresse du rbnb
+
+reviews : cet élément représente le nombre d'avis sur le rbnb
+
+overall_satisfaction : cet élément représente la note moyenne du rbnb
+
+accommodates : 
+
+bedrooms : cet élément représente le nombre de chambre du rbnb
+
+bathrooms : cet élément représente le nombre de salle de bain du rbnb
+  
+price : cet élément représente le prix en fonction du rate_type et de currency
+
+last_modified : cet élément représente la dernière modification du rbnb
+  
+latitude : cet élément représente la latitude du rbnb
+  
+longitude : cet élément représente la longitude du rbnb
+  
+location : 
+  
+name : cet élément représente le nom du rbnb
+  
+currency : cet élément représente la devise utilisé pour payer
+  
+rate_type : cet élément représente le mode de facturation du rbnb
+  
+# Analyse descriptive
+
+## Statistiques de base
+
+## Distribution des variables clés
+
+## Visualisations simples
+
+# Analyse exploratoire bivariée
+
+## Corrélations entre variables numériques
+
+## Comparaison des prix selon des catégories (t-test, ANOVA)
+
+## Visualisations : scatterplots, boxplots, heatmaps
+
+# Modélisation
+
+## Régression linéaire multiple
+
+## Régression logarithmique 
+
+# Analyse géographique
+
+## Cartographie des prix par quartier ou coordonnées
+
+## Cartes de densité 
+
+## Comparaison géographique des prix
+
+# Interprétation et conclusions
+
+## Facteurs influençant le prix
+
+## Quartiers ou caractéristiques les plus chers/abordables
+
+## Limites de l’analyse et recommandations
+
+
