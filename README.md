@@ -5,9 +5,11 @@ Analyse statistique sur les jeux de données airbnb à Seattle
 
 Pour commencer il est necessaire d'installer les packages suivant : 
   - shiny avec la commande install.packages("shiny")
-  - leaflet install.packages("shiny")
-  - dplyr install.packages("shiny")
+  - leaflet install.packages("leaflet")
+  - leaflet.extras install.packages("leaflet.extras")
+  - dplyr install.packages("dplyr")
   - bslib install.packages("bslib")
+  - ggplot2 install.packages("ggplot2")
 
 
 ### Pré-requis
@@ -31,7 +33,11 @@ ou bien dans la console taper la comme **"runApp()"**.
 * **R et Rstudio** : (https://posit.co/download/rstudio-desktop/) - R et R studio 
 * **shiny** : (https://shiny.posit.co/) - Application 
 * **leaflet** : (https://rstudio.github.io/leaflet/) - Carte
+* **leaflet.extras** : (https://github.com/trafficonese/leaflet.extras) - Carte HeatMap
 * **dplyr** : (https://dplyr.tidyverse.org/) - Data manipulation
+* **bslib** : (https://rstudio.github.io/bslib/) - Theme
+* **ggplot2** : (http://ggplot2.tidyverse.org/) - Graphique
+
 
 ## Auteurs
 
