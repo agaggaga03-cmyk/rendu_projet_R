@@ -23,9 +23,17 @@ function(input, output, session) {
     paste("Nombre de locations:", nrow(airbnb_filtree()))
   })
   
+  output$vb_location <- renderText({
+    paste(nrow(airbnb_filtree()))
+  })
+  
   # Prix moyen
   output$prix_moyen <- renderText({
     paste("Prix moyen: $", round(mean(airbnb_filtree()$price, na.rm = TRUE), 2))
+  })
+  
+  output$vb_prix_moyen <- renderText({
+    round(mean(airbnb_filtree()$price, na.rm = TRUE),2)
   })
   
   # Table des types de logements
