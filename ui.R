@@ -24,6 +24,24 @@ fluidPage(
       tableOutput("room_types")
     ),
     mainPanel(
+      fluidRow(
+        column(4, 
+               value_box(
+                 title = "Nombre total de locations",
+                 value = textOutput("vb_location"),
+                 showcase = bsicons::bs_icon("house-door-fill"),
+                 theme = value_box_theme(bg = "#DF6919", fg = "white")
+               )
+        ),
+        column(4, 
+               value_box( 
+                 title = "Prix moyen :",
+                 value = textOutput("vb_prix_moyen"),
+                 showcase = bsicons::bs_icon("currency-dollar"),
+                 theme = value_box_theme(bg = "#DF6919", fg = "white")
+               )
+        )
+      ),
       tabsetPanel(
         tabPanel("Carte de Seattle",
                  br(),
@@ -44,7 +62,7 @@ fluidPage(
                    column(6, plotOutput("prix_chambres", height = "400px")),
                    column(6, plotOutput("satisfaction_prix",height = "400px"))
                  
-                 )
+                 ),
         )
       )
     )
