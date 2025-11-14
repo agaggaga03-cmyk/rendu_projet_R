@@ -5,10 +5,10 @@ library(bslib)
 
 
 # Interface utilisateur
-fluidPage(
+navbarPage(
   titlePanel("Locations Airbnb à Seattle"),
   theme = bs_theme(bootswatch = "superhero"),
-  
+  br(),
   #Implementation de la sidebar 
   sidebarLayout(
     sidebarPanel(
@@ -20,6 +20,25 @@ fluidPage(
                   value = c(15,5900)),
       hr(),
       br(),
+      sliderInput(inputId = "avis",
+                  label = "Note",
+                  min = 0,
+                  max = 5,
+                  value = c(0,5)),
+      hr(),
+      br(),
+      sliderInput(inputId = "reviews",
+                  label = "Nombre d'avis",
+                  min = 0,
+                  max = 687,
+                  value = c(0,687)),
+      hr(),
+      br(),
+      sliderInput(inputId = "capacite",
+                  label = "Capacite d'hebergement/chambre",
+                  min = 1,
+                  max = 28,
+                  value = c(1,28)),
       uiOutput("stats"),
       tableOutput("room_types")
     ),
@@ -38,6 +57,14 @@ fluidPage(
                  title = "Prix moyen :",
                  value = textOutput("vb_prix_moyen"),
                  showcase = bsicons::bs_icon("currency-dollar"),
+                 theme = value_box_theme(bg = "#DF6919", fg = "white")
+               )
+        ),
+        column(4, 
+               value_box( 
+                 title = "Type de Logement :",
+                 value = uiOutput("room_types"),
+                 showcase = bsicons::bs_icon("house-door-fill"),
                  theme = value_box_theme(bg = "#DF6919", fg = "white")
                )
         )
