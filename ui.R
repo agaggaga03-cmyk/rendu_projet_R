@@ -9,6 +9,7 @@ fluidPage(
   titlePanel("Locations Airbnb à Seattle"),
   theme = bs_theme(bootswatch = "superhero"),
   
+  #Implementation de la sidebar 
   sidebarLayout(
     sidebarPanel(
       #Fourchette de prix
@@ -19,9 +20,10 @@ fluidPage(
                   value = c(15,5900)),
       hr(),
       br(),
-      uiOutput("stats")
+      uiOutput("stats"),
+      tableOutput("room_types")
     ),
-    card(
+    mainPanel(
       tabsetPanel(
         tabPanel("Carte de Seattle",
                  br(),
@@ -33,9 +35,18 @@ fluidPage(
                  leafletOutput("heat_map", height = "600px")),
         
         tabPanel("Statistique de Seattle",
-               br(),
-               h4("Graphique")),
+                 br(),
+                 fluidRow(
+                   column(6, plotOutput("prix_distribution", height = "400px")),
+                   column(6, plotOutput("prix_par_type",height = "400px"))
+                 ),
+                 fluidRow(
+                   column(6, plotOutput("prix_chambres", height = "400px")),
+                   column(6, plotOutput("satisfaction_prix",height = "400px"))
+                 
+                 )
         )
+      )
     )
   )
 )
