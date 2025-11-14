@@ -11,11 +11,23 @@ airbnb_data <- read.csv("seattle.csv", stringsAsFactors = FALSE) |>
   filter(longitude > -123 & longitude < -122) #Pareil
 
 
+
 function(input, output, session) {
-  # on filtre en fonction de la fouchette de prix 
+  # Données filtrées en fonction de TOUS les sliders
   airbnb_filtree <- reactive({
-    airbnb_data |>
-      filter(price >= input$prix[1] & price <= input$prix[2])
+    data <- airbnb_data |>
+      filter(price >= input$prix[1] & price <= input$prix[2]) |>
+      filter(reviews >= input$reviews[1] & reviews <= input$reviews[2]) |>
+      filter(accommodates >= input$capacite[1] & accommodates <= input$capacite[2])
+    
+    # Filtre pour les avis : exclure les NA si on ne sélectionne pas 0
+    if (input$avis[1] > 0 | input$avis[2] < 5) {
+      data <- data |>
+        filter(!is.na(overall_satisfaction)) |>
+        filter(overall_satisfaction >= input$avis[1] & overall_satisfaction <= input$avis[2])
+    }
+    
+    return(data)
   })
   
   # Nombre de locations
@@ -35,6 +47,9 @@ function(input, output, session) {
   output$vb_prix_moyen <- renderText({
     round(mean(airbnb_filtree()$price, na.rm = TRUE),2)
   })
+  
+  #output$room_types <- renderText({
+    #paste()
   
   # Table des types de logements
   output$room_types <- renderUI({
