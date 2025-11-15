@@ -48,8 +48,6 @@ function(input, output, session) {
     round(mean(airbnb_filtree()$price, na.rm = TRUE),2)
   })
   
-  #output$room_types <- renderText({
-    #paste()
   
   # Table des types de logements
   output$room_types <- renderUI({
@@ -80,6 +78,37 @@ function(input, output, session) {
                  )
       )
     )
+  })
+  
+  # Types de logements formatés
+  output$vb_types_liste <- renderUI({
+    data_filtered <- airbnb_filtree()
+    
+    if (nrow(data_filtered) == 0) {
+      return(tags$div(style = "font-size: 24px;", "Aucun"))
+    }
+    
+    # Compter chaque type
+    type_counts <- as.data.frame(table(data_filtered$room_type))
+    colnames(type_counts) <- c("Type", "Nombre")
+    
+    # Extraire les valeurs correctement
+    entire <- sum(type_counts$Nombre[type_counts$Type == "Entire home/apt"], na.rm = TRUE)
+    private <- sum(type_counts$Nombre[type_counts$Type == "Private room"], na.rm = TRUE)
+    shared <- sum(type_counts$Nombre[type_counts$Type == "Shared room"], na.rm = TRUE)
+    
+    # Si aucune valeur n'est trouvée, mettre 0
+    if (length(entire) == 0) entire <- 0
+    if (length(private) == 0) private <- 0
+    if (length(shared) == 0) shared <- 0
+    
+    HTML(paste0(
+      '<div style="font-size: 13px; line-height: 1.2;">',
+      '<div><strong>Entire home/apt : </strong>', entire, '</div>',
+      '<div><strong>Private room : </strong>', private, '</div>',
+      '<div><strong>Shared room : </strong>', shared, '</div>',
+      '</div>'
+    ))
   })
   
   # statistique

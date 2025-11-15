@@ -39,8 +39,6 @@ navbarPage(
                   min = 1,
                   max = 28,
                   value = c(1,28)),
-      uiOutput("stats"),
-      tableOutput("room_types")
     ),
     mainPanel(
       fluidRow(
@@ -63,7 +61,7 @@ navbarPage(
         column(4, 
                value_box( 
                  title = "Type de Logement :",
-                 value = uiOutput("room_types"),
+                 value = uiOutput("vb_types_liste"),
                  showcase = bsicons::bs_icon("house-door-fill"),
                  theme = value_box_theme(bg = "#DF6919", fg = "white")
                )
