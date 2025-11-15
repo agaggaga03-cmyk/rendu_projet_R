@@ -48,6 +48,156 @@ function(input, output, session) {
     round(mean(airbnb_filtree()$price, na.rm = TRUE),2)
   })
   
+  #Carte de densité géographique des prix
+  output$density_map <- renderPlot({
+    data_filtered <- airbnb_filtree()
+    
+    if (nrow(data_filtered) == 0) return(NULL)
+    
+    ggplot(data_filtered, aes(x = longitude, y = latitude, color = price)) +
+      geom_point(alpha = 0.6, size = 2) +
+      scale_color_gradient(low = "blue", high = "red", name = "Prix ($)") +
+      labs(title = "Répartition géographique des prix",
+           x = "Longitude", y = "Latitude") +
+      theme_minimal() +
+      theme(plot.background = element_rect(fill = "#2C3E50"),
+            panel.background = element_rect(fill = "#34495E"),
+            text = element_text(color = "white"),
+            axis.text = element_text(color = "white"),
+            legend.background = element_rect(fill = "#34495E"))
+  })
+  
+  #Prix par capacité d'hébergement
+  output$prix_capacite <- renderPlot({
+    data_filtered <- airbnb_filtree() %>%
+      filter(accommodates <= 12)  # Limiter pour clarté
+    
+    if (nrow(data_filtered) == 0) return(NULL)
+    
+    prix_par_capacite <- data_filtered %>%
+      group_by(accommodates) %>%
+      summarise(prix_moyen = mean(price, na.rm = TRUE),
+                nb = n())
+    
+    ggplot(prix_par_capacite, aes(x = factor(accommodates), y = prix_moyen, fill = nb)) +
+      geom_col() +
+      geom_text(aes(label = paste0("$", round(prix_moyen, 0))), 
+                vjust = -0.5, color = "white") +
+      scale_fill_gradient(low = "#3498DB", high = "#E74C3C", name = "Nombre") +
+      labs(title = "Prix moyen selon la capacité d'accueil",
+           x = "Nombre de personnes", y = "Prix moyen ($)") +
+      theme_minimal() +
+      theme(plot.background = element_rect(fill = "#2C3E50"),
+            panel.background = element_rect(fill = "#34495E"),
+            text = element_text(color = "white"),
+            axis.text = element_text(color = "white"),
+            legend.background = element_rect(fill = "#34495E"))
+  })
+  
+  #distribution des notes
+  output$distribution_notes <- renderPlot({
+    data_filtered <- airbnb_filtree() %>%
+      filter(!is.na(overall_satisfaction))
+    
+    if (nrow(data_filtered) == 0) return(NULL)
+    
+    ggplot(data_filtered, aes(x = overall_satisfaction)) +
+      geom_histogram(binwidth = 0.5, fill = "#DF691A", color = "white") +
+      labs(title = "Distribution des notes de satisfaction",
+           x = "Note (sur 5)", y = "Nombre de locations") +
+      scale_x_continuous(breaks = seq(0, 5, 0.5)) +
+      theme_minimal() +
+      theme(plot.background = element_rect(fill = "#2C3E50"),
+            panel.background = element_rect(fill = "#34495E"),
+            text = element_text(color = "white"),
+            axis.text = element_text(color = "white"))
+  })
+  
+  #Nombre d'avis vs prix
+  output$reviews_prix <- renderPlot({
+    data_filtered <- airbnb_filtree() %>%
+      filter(reviews > 0)
+    
+    if (nrow(data_filtered) == 0) return(NULL)
+    
+    ggplot(data_filtered, aes(x = reviews, y = price)) +
+      geom_point(alpha = 0.4, color = "#3498DB") +
+      geom_smooth(method = "loess", color = "#E74C3C", se = TRUE) +
+      labs(title = "Relation entre nombre d'avis et prix",
+           x = "Nombre d'avis", y = "Prix ($)") +
+      theme_minimal() +
+      theme(plot.background = element_rect(fill = "#2C3E50"),
+            panel.background = element_rect(fill = "#34495E"),
+            text = element_text(color = "white"),
+            axis.text = element_text(color = "white"))
+  })
+  
+  #Top des quartiers les plus chers
+  output$top_quartiers <- renderPlot({
+    data_filtered <- airbnb_filtree()
+    
+    # Extraire le quartier depuis l'adresse (simplifié)
+    data_filtered$quartier <- sub(",.*", "", data_filtered$address)
+    
+    top_quartiers <- data_filtered %>%
+      group_by(quartier) %>%
+      summarise(prix_moyen = mean(price, na.rm = TRUE),
+                nb_locations = n()) %>%
+      filter(nb_locations >= 10) %>%  # Au moins 10 locations
+      arrange(desc(prix_moyen)) %>%
+      head(10)
+    
+    ggplot(top_quartiers, aes(x = reorder(quartier, prix_moyen), y = prix_moyen)) +
+      geom_col(fill = "#DF691A") +
+      geom_text(aes(label = paste0("$", round(prix_moyen, 0))), 
+                hjust = -0.2, color = "white") +
+      coord_flip() +
+      labs(title = "Top 10 des quartiers les plus chers",
+           x = "", y = "Prix moyen ($)") +
+      theme_minimal() +
+      theme(plot.background = element_rect(fill = "#2C3E50"),
+            panel.background = element_rect(fill = "#34495E"),
+            text = element_text(color = "white"),
+            axis.text = element_text(color = "white"))
+  })
+  
+  #Nombre de Logement par quartier
+  output$logements_par_quartier <- renderPlot({
+    data_filtered <- airbnb_filtree()
+    
+    if (nrow(data_filtered) == 0) return(NULL)
+    
+    # Extraire le quartier depuis l'adresse
+    data_filtered$quartier <- trimws(sub(",.*", "", data_filtered$address))
+    
+    # Compter le nombre de logements par quartier
+    quartiers_count <- data_filtered %>%
+      group_by(quartier) %>%
+      summarise(nb_logements = n()) %>%
+      arrange(desc(nb_logements)) %>%
+      head(15)  # Top 15 quartiers
+    
+    if (nrow(quartiers_count) == 0) return(NULL)
+    
+    ggplot(quartiers_count, aes(x = reorder(quartier, nb_logements), y = nb_logements, fill = nb_logements)) +
+      geom_col() +
+      geom_text(aes(label = nb_logements), 
+                hjust = -0.2, color = "white", size = 5) +
+      coord_flip() +
+      scale_fill_gradient(low = "#3498DB", high = "#E74C3C", name = "Nombre") +
+      labs(title = "Nombre de logements par quartier",
+           x = "Quartier", y = "Nombre de logements Airbnb") +
+      theme_minimal(base_size = 14) +
+      theme(plot.background = element_rect(fill = "#2C3E50"),
+            panel.background = element_rect(fill = "#34495E"),
+            text = element_text(color = "white"),
+            axis.text = element_text(color = "white"),
+            legend.background = element_rect(fill = "#34495E"),
+            legend.text = element_text(color = "white"),
+            panel.grid = element_line(color = "#404040"))
+  })
+  
+  
   
   # Table des types de logements
   output$room_types <- renderUI({

@@ -88,6 +88,19 @@ navbarPage(
                    column(6, plotOutput("satisfaction_prix",height = "400px"))
                  
                  ),
+                 fluidRow(
+                   column(6, plotOutput("prix_capacite", height = "400px")),
+                   column(6, plotOutput("distribution_notes", height = "400px"))
+                 ),
+                 fluidRow(
+                   column(12, plotOutput("density_map", height = "500px"))
+                 ),
+                 fluidRow(
+                   column(12, plotOutput("top_quartiers", height = "500px"))
+                 ),
+                 fluidRow(
+                   column(12, plotOutput("logements_par_quartier", height = "500px"))
+                 )
         )
       )
     )
