@@ -4,11 +4,28 @@ library(leaflet.extras)  # Pour la heatmap
 library(dplyr)
 library(ggplot2)
 
-# Lecture du fichiers csv 
-airbnb_data <- read.csv("seattle.csv", stringsAsFactors = FALSE) |>
-  filter(!is.na(latitude) & !is.na(longitude)) |> #on gere les valeurs manquantes
-  filter(latitude > 47 & latitude < 48) |> #Pour se restreindre uniquement a Seattle
-  filter(longitude > -123 & longitude < -122) #Pareil
+# ------------------------------------------------------------------------------
+# CHARGEMENT DES DONNES DU FICHIER CSV ET FILTRAGE
+# ------------------------------------------------------------------------------
+
+# Lecture du fichiers csv à l'aide d'une fonction comme ca on peut utiliser tryCatch
+charger_donnees <- function(fichier = "seattle.csv") {
+  tryCatch({ #On gere l'erreur liée au chargement des donnée grace a TryCatch en renvoyant dans la console le resultat
+    airbnb_data <- read.csv("seattle.csv", stringsAsFactors = FALSE) |>
+      filter(!is.na(latitude) & !is.na(longitude)) |> #on enleve les valeurs longitude et latitude manquantes
+      filter(latitude > 47 & latitude < 48) |> #On garde les coordonnées uniquement vers Seattle
+      filter(longitude > -123 & longitude < -122) #Idem
+    message(sprintf("✓ Données chargées avec succès : %d locations", nrow(airbnb_data)))
+    return(airbnb_data)
+  }, error = function(e) {
+    stop(sprintf("❌ Erreur lors du chargement des données : %s\nVérifiez que le fichier '%s' existe dans le dossier.", 
+                 e$message, fichier))
+    })
+}
+
+#On charge les donnees au démarrage
+airbnb_data <- charger_donnees()
+  
 
 
 
@@ -197,39 +214,6 @@ function(input, output, session) {
             panel.grid = element_line(color = "#404040"))
   })
   
-  
-  
-  # Table des types de logements
-  output$room_types <- renderUI({
-    data_filtered <- airbnb_filtree()
-    
-    if (nrow(data_filtered) == 0) {
-      return(p("Aucune location dans cette fourchette"))
-    }
-    
-    room_count <- as.data.frame(table(data_filtered$room_type))
-    colnames(room_count) <- c("Type", "Nombre")
-    
-    tagList(
-      tags$table(class = "table table-striped",
-                 tags$thead(
-                   tags$tr(
-                     tags$th("Type"),
-                     tags$th("Nombre")
-                   )
-                 ),
-                 tags$tbody(
-                   lapply(1:nrow(room_count), function(i) {
-                     tags$tr(
-                       tags$td(room_count[i, 1]),
-                       tags$td(room_count[i, 2])
-                     )
-                   })
-                 )
-      )
-    )
-  })
-  
   # Types de logements formatés
   output$vb_types_liste <- renderUI({
     data_filtered <- airbnb_filtree()
@@ -252,13 +236,13 @@ function(input, output, session) {
     if (length(private) == 0) private <- 0
     if (length(shared) == 0) shared <- 0
     
-    HTML(paste0(
-      '<div style="font-size: 13px; line-height: 1.2;">',
-      '<div><strong>Entire home/apt : </strong>', entire, '</div>',
-      '<div><strong>Private room : </strong>', private, '</div>',
-      '<div><strong>Shared room : </strong>', shared, '</div>',
-      '</div>'
-    ))
+     HTML(paste0(
+    '<div style="font-size: 12px; line-height: 1.4;">',
+    '<div style="margin: 2px 0;"><strong>🏠 Entier :</strong> ', entire, '</div>',
+    '<div style="margin: 2px 0;"><strong>🚪 Privé :</strong> ', private, '</div>',
+    '<div style="margin: 2px 0;"><strong>👥 Partagé :</strong> ', shared, '</div>',
+    '</div>'
+  ))
   })
   
   # statistique
@@ -358,16 +342,50 @@ function(input, output, session) {
       )
     }
     
-    # Créer les popups avec les informations
+    # Popups stylisés pour la carte
     popups <- paste0(
-      "<strong>", data_filtered$name, "</strong><br/>",
-      "Type: ", data_filtered$room_type, "<br/>",
-      "Prix: $", data_filtered$price, " ", data_filtered$rate_type, "<br/>",
-      "Capacité: ", data_filtered$accommodates, " personnes<br/>",
-      "Chambres: ", data_filtered$bedrooms, "<br/>",
-      "Note: ", ifelse(!is.na(data_filtered$overall_satisfaction), 
-                       data_filtered$overall_satisfaction, "Non notée"), "<br/>",
-      "Avis: ", data_filtered$reviews
+      "<div style='font-family: Arial, sans-serif; min-width: 220px; max-width: 300px;'>",
+      "<h4 style='margin: 0 0 10px 0; color: #DF691A; font-size: 16px; border-bottom: 2px solid #DF691A; padding-bottom: 5px;'>",
+      data_filtered$name, "</h4>",
+      
+      "<table style='width: 100%; font-size: 13px; line-height: 1.6;'>",
+      "<tr>",
+      "<td style='padding: 3px 10px 3px 0; color: #7F8C8D; font-weight: bold;'>Type</td>",
+      "<td style='padding: 3px 0;'>", data_filtered$room_type, "</td>",
+      "</tr>",
+      
+      "<tr style='background-color: rgba(223, 105, 26, 0.1);'>",
+      "<td style='padding: 3px 10px 3px 0; color: #7F8C8D; font-weight: bold;'>Prix</td>",
+      "<td style='padding: 3px 0; color: #27AE60; font-weight: bold; font-size: 15px;'>",
+      "$", data_filtered$price, " <span style='font-size: 11px; color: #95A5A6;'>/", data_filtered$rate_type, "</span></td>",
+      "</tr>",
+      
+      "<tr>",
+      "<td style='padding: 3px 10px 3px 0; color: #7F8C8D; font-weight: bold;'>Capacité</td>",
+      "<td style='padding: 3px 0;'>👥 ", data_filtered$accommodates, " personnes</td>",
+      "</tr>",
+      
+      "<tr style='background-color: rgba(223, 105, 26, 0.1);'>",
+      "<td style='padding: 3px 10px 3px 0; color: #7F8C8D; font-weight: bold;'>Chambres</td>",
+      "<td style='padding: 3px 0;'>🛏️ ", data_filtered$bedrooms, "</td>",
+      "</tr>",
+      
+      "<tr>",
+      "<td style='padding: 3px 10px 3px 0; color: #7F8C8D; font-weight: bold;'>Note</td>",
+      "<td style='padding: 3px 0;'>", 
+      ifelse(!is.na(data_filtered$overall_satisfaction), 
+             paste0("⭐ <span style='color: #F39C12; font-weight: bold;'>", data_filtered$overall_satisfaction, "</span>/5"), 
+             "❌ <span style='color: #95A5A6;'>Non notée</span>"), 
+      "</td>",
+      "</tr>",
+      
+      "<tr style='background-color: rgba(223, 105, 26, 0.1);'>",
+      "<td style='padding: 3px 10px 3px 0; color: #7F8C8D; font-weight: bold;'>Avis</td>",
+      "<td style='padding: 3px 0;'>💬 ", data_filtered$reviews, "</td>",
+      "</tr>",
+      
+      "</table>",
+      "</div>"
     )
     
     # Créer la carte
