@@ -257,13 +257,6 @@ navbarPage(
                            icon("comments"), " Popularité"),
                         plotOutput("reviews_prix", height = "450px")
                       ),
-                    
-                      # Section 5: Géographie
-                      div(
-                        style = "background: rgba(52, 73, 94, 0.3); padding: 20px; border-radius: 8px; margin-bottom: 20px;",
-                        h3(style = "color: #9B59B6; margin-top: 0;", 
-                           icon("map"), " Analyse Géographique"),
-                      ),
                       # Section 6: Quartiers
                     
                       div(
