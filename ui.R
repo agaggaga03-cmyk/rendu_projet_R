@@ -68,7 +68,7 @@ navbarPage(
   tabPanel("Dashboard",
            icon = icon("dashboard"),
            
-            #Implementation de la sidebar 
+            #Implementation de la sidebar avec les filtres 
             sidebarLayout(
               sidebarPanel(
                 width = 3,
@@ -78,10 +78,6 @@ navbarPage(
                     h3(style = "color: #DF691A; margin: 0;",
                        icon("filter")," Filtres")
                     ),
-                
-                
-                
-                
                 #Slider de Fourchette de prix
                 
                 div(
@@ -234,8 +230,10 @@ navbarPage(
                         h3(style = "color: #3498DB; margin-top: 0;", 
                            icon("bed"), " Capacité d'Accueil"),
                         fluidRow(
-                          column(6, plotOutput("prix_chambres", height = "400px")),
-                          column(6, plotOutput("prix_capacite", height = "400px"))
+                          column(6, plotOutput("prix_chambres", height = "400px"))
+                        ),
+                        fluidRow(
+                          column(12, plotOutput("prix_capacite", height = "400px"))
                         )
                       ),
                     
@@ -257,6 +255,7 @@ navbarPage(
                            icon("comments"), " Popularité"),
                         plotOutput("reviews_prix", height = "450px")
                       ),
+
                       # Section 6: Quartiers
                     
                       div(
@@ -294,21 +293,26 @@ navbarPage(
                  "Cette application interactive permet d'explorer et d'analyser les données Airbnb de Seattle. 
                  Vous pouvez filtrer les locations selon différents critères(Prix,avis,note,accueil) et visualiser les tendances du marché."),
                
-               h4(style = "color: white;", "🎯 Fonctionnalités RETIRE"),
+               h4(style = "color: white;", "🎯 Fonctionnalités "),
                tags$ul(style = "color: #BDC3C7; font-size: 16px;",
                        tags$li("Filtres interactifs par prix, note, nombre d'avis et capacité"),
                        tags$li("Cartes interactives avec localisation des Airbnb"),
                        tags$li("Heatmap des prix par zone géographique"),
-                       tags$li("Analyses statistiques complètes"),
-                       tags$li("Visualisations dynamiques et réactives")
+                       tags$li("Analyses statistiques"),
                ),
                
-               h4(style = "color: white;", "🔎 Remarque RETIRE"),
+               h4(style = "color: white;", "🔎 Remarque "),
                p(style = "color: #BDC3C7; font-size: 16px;",
                  "Il y a un trop gros écart entre l'Airbnb le plus cher (5900$) et les autres Airbnb,
                  ce qui graphiquement allonge l'axe des abscisses et ainsi rétrécit certains graphiques.
                  Également la heatmap qui est rouge partout sur Seattle, cela est dû au nombre d'Airbnb
-                 placé juste à Seattle, ne pas hésiter à restreindre le scoop et TESTER.")
+                 placé juste à Seattle, ne pas hésiter à restreindre le scoop et TESTER."),
+               
+               h4(style = "color: white;", "🚨 Attention"),
+               p(style = "color: #BDC3C7; font-size: 16px;",
+                 "Éviter de mettre la capacité d'accueil à 1, et ensuite aller dans l'onglet statistiques
+                 sinon votre RStudio risquerait de crasher.Nous avons essayer de trouver et resoudre le probleme 
+                 mais sans succes.")
              )
       )
     )
