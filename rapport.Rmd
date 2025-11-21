@@ -117,7 +117,7 @@ kable(tab_stats, digits = 2,
       align = c('l', 'c', 'c', 'c', 'c', 'c'))
 ```
 
-Sur ce tableau nous pouvons observer une multitude d'informations:
+**Observation :** Sur ce tableau nous pouvons observer une multitude d'informations:
 
 Premièrement on voit que le fichier contient 7576 n-uplet ce qui va un peu compliquer la visualisation graphique des données. 
 
@@ -149,7 +149,7 @@ p1 <- ggplot(airbnb, aes(x = price)) +
 print(p1)
 ```
 
-Comme dit précédemment il est difficile de voire toutes les valeurs car certaines sont vraiment éloigné et la majorité sont proche de la moyenne comme on peut le voire
+**Observation :** Comme dit précédemment il est difficile de voire toutes les valeurs car certaines sont vraiment éloigné et la majorité sont proche de la moyenne comme on peut le voire
 
 avec environ 7000 qui avoisine le prix de 100 euros tout le reste est éparpiller juste derriere et quelque unes sont vers les 4000 euros la nuit
 
@@ -176,7 +176,7 @@ p2 <- ggplot(airbnb %>% filter(!is.na(overall_satisfaction)),
 print(p2)
 ```
 
-Là encore on a du mal a faire la distinction des minorités sur le diagramme mais ce qui est sur c'est qu'une extrême minorité des logements ont de trés mauvaises notes.
+**Observation :** Là encore on a du mal a faire la distinction des minorités sur le diagramme mais ce qui est sur c'est qu'une extrême minorité des logements ont de trés mauvaises notes.
 
 Avec l'écrasente majorité des cas qui se situe entre 4 et 5 étoiles dans les avis leurs moyennes est vraiment bonne en générale.
 
@@ -209,7 +209,7 @@ p3 <- airbnb %>%
 print(p3)
 ```
 
-Finalement on peut voire sur ce nouveau diagramme que 74% des airbnb sont des appartements à louer ce qui est en toute logique la base de leurs plateformes de vente.
+**Observation :** Finalement on peut voire sur ce nouveau diagramme que 74% des airbnb sont des appartements à louer ce qui est en toute logique la base de leurs plateformes de vente.
 
 Avec un nombre minime de chambre partagé et quelques chambres privée encore une fois est ce que le type de chambre afflue sur le prix?
 
@@ -227,7 +227,7 @@ geom_tile() +
 geom_text(aes(label = round(value, 2)))
 ```
 
-Au départ nous nous posions la question de la corrélations entre les variables. Et bien il extiste une matrice de corrélation qui peut mettre en exergue celle-ci.
+**Observation :** Au départ nous nous posions la question de la corrélations entre les variables. Et bien il extiste une matrice de corrélation qui peut mettre en exergue celle-ci.
 
 Analysons étapes par étapes cette matrice:
 
@@ -239,7 +239,7 @@ Analysons étapes par étapes cette matrice:
 
 Maintenant que nous avons une idée des principales des variables numériques prenons un exemple et faisons une études pour le nombre de chambre qui parait assez évident
 
-## Visualisation : boite a moustache
+## Visualisation : 
 
 ```{r}
 ggplot(airbnb, aes(bedrooms, price)) +
@@ -249,7 +249,7 @@ ggplot(airbnb, aes(bedrooms, price)) +
 
 ```
 
-Comme on le voit bien ici la tendence montre que le prix augmente avec le nombre de chambre ce qui valide le lien de corrélationentre les deux
+**Observation :** Comme on le voit bien ici la tendence montre que le prix augmente avec le nombre de chambre ce qui valide le lien de corrélationentre les deux
 
 On remarque aussi que ce graphique montre d'avantage les valeurs extrêmes comparé aux autres.
 
@@ -271,9 +271,11 @@ kable(tidy(model_lm), digits = 3,
 
 ```
 
-Analisons maintenant la régréssion qui nous dit:
+**Observation :** Analisons maintenant la régréssion qui nous dit:
 
-On voit pour chaque unité de variable ajouté qu'il y a une valeur ajouté en dollar au prix :
+On voit pour chaque unité de variable ajouté qu'il y a une valeur ajouté en dollar au prix:
+
+-  -11 cents pour chaque review en plus
 
 -  8 dollar par unité de capacité en plus
 
@@ -281,6 +283,9 @@ On voit pour chaque unité de variable ajouté qu'il y a une valeur ajouté en d
 
 -  26 pour les chambres 
 
+-  20 pour la les unité de satisfaction
+
+\newpage
 
 ## Régression logarithmique
 
@@ -289,6 +294,19 @@ model_log <- lm(log(price) ~ reviews + overall_satisfaction + bedrooms + bathroo
 kable(tidy(model_log), digits = 3,
       caption = "Résumé du modèle logarithmique")
 ```
+
+**Observation :** Pour la régression logarithmique c'est une valeur en % qu'il nous retourne et non une valeur en dollar
+On voit pour chaque unité de variable ajouté qu'il y a une augmentation du prix en % :
+
+-  -1% pour chaque avis en plus
+
+-  +22% pour chaque point de satisfaction
+
+-  +14% pour les chambres 
+
+-  +3% pour les salles de bains
+
+-  +9% pour la capacité
 
 \newpage
 
@@ -304,11 +322,37 @@ ggplot(airbnb, aes(longitude, latitude, color=price)) +
 
 ```
 
+**Observation :** Maintenant que les variables numérique ont été étudié nous pouvons passé aux autres à savoir la latitude l'adresse la longitude et la localisation qui forment la géographie des airbnbs
+
+Ce qu'on peut déduire de cette carte c'est que la concentration est très forte dans la partie ouest de la villes. 
+
+On notera qu'il y a une sorte de rivière visible sur l'application qui sépare les deux parties de points
+
+On observe aussi qu'il y a très peu de différences de couleurs et tout ça à causes des valeurs extreme comme déjà mentionné
 
 \newpage
 
 # Interprétation et conclusions
 
-## Facteurs influençant le prix
+**Conclusion :** Notre analyse des données Airbnb de Seattle nous permet de répondre à la
 
-## Limites de l’analyse et recommandations
+problématique initiale concernant les facteurs influençant le prix des locations. Les
+
+résultats démontrent que les caractéristiques physiques des logements constituent les
+
+déterminants principaux, avec le nombre de chambres comme facteur le plus significatif
+
+suivie par les salles de bain et la capacité d'accueil. La satisfaction des clients, bien
+
+que moins déterminante que les caractéristiques structurelles, exerce néanmoins une
+
+influence notable sur la fixation des prix. La distribution géographique révèle une forte
+
+concentration des offres dans le centre-ville sans pour autant montrer des disparités de
+
+prix marquées entre les différents secteurs. Cette étude confirme ainsi l'importance des
+
+attributs tangibles du logement dans la stratégie tarifaire, tout en soulignant la valeur
+
+économique de la réputation numérique dans l'économie collaborative.
+
