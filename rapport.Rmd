@@ -1,5 +1,5 @@
 ---
-title: "Rapport – Analyse Airbnb Seattle"
+title: "Rapport – Analyse airbnb Seattle"
 author: "Amine Halhali, Ismail Taaissat, Mohammed-Ibrahim Benahmida, Anas Imarrighen"
 date: "2025-11-02"
 fontsize: 11pt
@@ -22,129 +22,196 @@ library(scales)
 library(viridis)
 library(knitr)
 library(broom)
+library(patchwork)
 airbnb <- read.csv("seattle.csv")
 ```
+
+\newpage
 
 # Introduction
 
 ## Contexte de l’étude
 
-Le marché des locations de courte durée via des plateformes comme Airbnb connaît un développement rapide dans les grandes villes. Comprendre les facteurs qui influencent le prix d’une location est essentiel pour les propriétaires souhaitant optimiser leurs revenus, mais aussi pour les voyageurs souhaitant comparer les offres.
+Le marché des locations de courte durée via des plateformes comme airbnb connaît un développement rapide dans les grandes villes. Comprendre les facteurs qui influencent le prix d’une location est essentiel pour les propriétaires souhaitant optimiser leurs revenus, mais aussi pour les voyageurs souhaitant comparer les offres.
 
 ## Objectifs
 
-L'objectif de cette analyse est donc de pouvoir observé le lien de corrélation et/ou de causalité entres les paramétres mis à disposition dans le jeu de donnée. Nous nous attarderons sur les points important comme le prix et les avis comme base pour notre étude afin de bien répondre à la problématique: Quels facteurs influencent le prix d’une location Airbnb ?
+L'objectif de cette analyse est donc de pouvoir observé le lien de corrélation et/ou de causalité entres les paramétres mis à disposition dans le jeu de donnée. Nous nous attarderons sur les points important comme le prix et les avis comme base pour notre étude afin de bien répondre à la problématique: Quels facteurs influencent le prix d’une location airbnb ?
 
-# Description du jeu de données
+```{r, echo=FALSE}
+tab_stats <- airbnb |>
+  select(price, reviews, overall_satisfaction, bedrooms, bathrooms, accommodates) |>
+  head(20)
 
-## Variables disponibles
+knitr::kable(tab_stats, caption = "Visualisation des 20 premières lignes du fichier csv")
 
-On compte pas moins de 17 paramétres dans le jeu de données:
-
--   room_id
--   host_id
--   room_type
--   adress
--   reviews
--   overall_satisfaction
--   accommodates
--   bedrooms
--   bathrooms
--   price
--   last_modified
--   latitude
--   longitude
--   location
--   name
--   currency
--   rate_type
+```
 
 \newpage
 
-## Description des données
+# Description du jeu de données
 
-room_id : cet élément représente l'identifiant du rbnb à louer
+On compte 17 paramétres différent dans le jeu de données:
 
-host_id : cet élément représente l'identifiant de la personne qui loue le rbnb
 
-room_type : cet élément représente le type de rbnb
+-  room_id : correspond à la clé primaire de la table (l'identifiant unique du n-uplet)
 
-adress : cet élément représente l'adresse du rbnb
+-  host_id : correspond à une clé étrangère surement celle d'une table propriétaire
 
-reviews : cet élément représente le nombre d'avis sur le rbnb
+-  room_type : le type de chambre on en compte 3 différentes(Chambre privée,chambre         partagé,appartement) 
 
-overall_satisfaction : cet élément représente la note moyenne du rbnb
+-  adress : l'adresse de la ville dans laquelle le airbnb se trouve
 
-accommodates : cet élément représente la capacité de personne pouvant être dans le rbnb
+-  reviews : le nombre d'avis sur le airbnb
 
-bedrooms : cet élément représente le nombre de chambre du rbnb
+-  overall_satisfaction : la note moyenne du airbnb
 
-bathrooms : cet élément représente le nombre de salle de bain du rbnb
+-  accommodates : capacité de logement en nombre de personnes
 
-price : cet élément représente le prix en fonction du rate_type et de currency
+-  bedrooms : le nombre de chambre
 
-last_modified : cet élément représente la dernière modification du rbnb
+-  bathrooms : le nombre de salle de bains / toilettes (certains sont à virgule et désigne  des salles de bains et toilettes séparés)
 
-latitude : cet élément représente la latitude du rbnb
+-  price : le prix de la location en lien avec la devise et le temps de réservation
 
-longitude : cet élément représente la longitude du rbnb
+-  last_modified : la dernière modification du airbnb
 
-location :
+-  latitude : cet élément représente la latitude du airbnb
 
-name : cet élément représente le nom du rbnb
+-  longitude : cet élément représente la longitude du airbnb
 
-currency : cet élément représente la devise utilisé pour payer
+-  location : correspond a la version de latitude et de longitude reconnaissable par la base de donnée avec une table PostGIS
 
-rate_type : cet élément représente le mode de facturation du rbnb
+-  name : le nom du bien immobilier sur airbnb
+
+-  currency : la devise utilisé pour le paiement
+
+-  rate_type : le mode de facturation
+
+\newpage
 
 # Analyse descriptive
 
 ## Statistiques de base
 ```{r}
+# Statistiques de base complètes
 tab_stats <- airbnb %>%
-select(price, reviews, overall_satisfaction, bedrooms, bathrooms, accommodates) %>%
-summarise(
-min_price = min(price, na.rm = TRUE),
-q1_price = quantile(price, 0.25, na.rm = TRUE),
-med_price = median(price, na.rm = TRUE),
-mean_price = mean(price, na.rm = TRUE),
-q3_price = quantile(price, 0.75, na.rm = TRUE),
-max_price = max(price, na.rm = TRUE),
-na_price = sum(is.na(price)),
-min_reviews = min(reviews, na.rm = TRUE),
-q1_reviews = quantile(reviews, 0.25, na.rm = TRUE),
-med_reviews = median(reviews, na.rm = TRUE),
-mean_reviews = mean(reviews, na.rm = TRUE),
-q3_reviews = quantile(reviews, 0.75, na.rm = TRUE),
-max_reviews = max(reviews, na.rm = TRUE),
-na_reviews = sum(is.na(reviews)),
-min_sat = min(overall_satisfaction, na.rm = TRUE),
-med_sat = median(overall_satisfaction, na.rm = TRUE),
-mean_sat = mean(overall_satisfaction, na.rm = TRUE),
-max_sat = max(overall_satisfaction, na.rm = TRUE),
-na_sat = sum(is.na(overall_satisfaction)),
-mean_bedrooms = mean(bedrooms, na.rm = TRUE),
-na_bedrooms = sum(is.na(bedrooms)),
-mean_bathrooms = mean(bathrooms, na.rm = TRUE),
-na_bathrooms = sum(is.na(bathrooms)),
-mean_accom = mean(accommodates, na.rm = TRUE),
-na_accom = sum(is.na(accommodates))
-)
-kable(tab_stats)
+  select(price, reviews, bedrooms, bathrooms, accommodates) %>%
+  summarise(across(everything(), 
+                   list(
+                     N = ~ sum(!is.na(.)),
+                     Mean = ~ mean(., na.rm = TRUE),
+                     SD = ~ sd(., na.rm = TRUE),
+                     Min = ~ min(., na.rm = TRUE),
+                     Max = ~ max(., na.rm = TRUE),
+                     Median = ~ median(., na.rm = TRUE)
+                   ), .names = "{.col}_{.fn}")) %>%
+  pivot_longer(everything(), names_to = "Variable_Stat", values_to = "Valeur") %>%
+  separate(Variable_Stat, into = c("Variable", "Statistique"), sep = "_") %>%
+  pivot_wider(names_from = Statistique, values_from = Valeur) %>%
+  select(Variable, N, Mean, SD, Median, Min, Max)
 
+# Affichage avec kable seul
+kable(tab_stats, digits = 2, 
+      caption = "Statistiques descriptives des variables numériques",
+      align = c('l', 'c', 'c', 'c', 'c', 'c'))
 ```
+
+Sur ce tableau nous pouvons observer une multitude d'informations:
+
+Premièrement on voit que le fichier contient 7576 n-uplet ce qui va un peu compliquer la visualisation graphique des données. 
+
+Des moyennes importantes sont aussi visible comme celle des reviews qui est assez élevé et celle du prix à la nuit qui est de 113 dollars américain.
+
+D'autres donnée y sont présenté comme l'écart-type(standard deviation SD) la médiane et les points extrêmes.
+
+On voit d'ailleur que l'écart-type du prix est assez élevé et il est meme plus grand que la moyenne ce qui est rare
 
 ## Distribution des variables clés
 
 ```{r}
-# Histogramme des prix
-ggplot(airbnb, aes(price)) +
-geom_histogram(bins = 40)
-ggplot(airbnb, aes(overall_satisfaction)) +
-geom_histogram(bins = 20)
-ggplot(airbnb, aes(room_type)) +
-geom_bar()
+# Distribution du prix - Version améliorée
+p1 <- ggplot(airbnb, aes(x = price)) +
+  geom_histogram(bins = 40, fill = "steelblue", color = "white", alpha = 0.8) +
+  labs(
+    title = "Distribution des prix des locations Airbnb à Seattle",
+    x = "Prix ($)",
+    y = "Nombre de logements",
+    caption = paste("Nombre total d'observations :", sum(!is.na(airbnb$price)))
+  ) +
+  theme_minimal() +
+  scale_x_continuous(labels = scales::dollar) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(color = "gray40")
+  )
+
+print(p1)
 ```
+
+Comme dit précédemment il est difficile de voire toutes les valeurs car certaines sont vraiment éloigné et la majorité sont proche de la moyenne comme on peut le voire
+
+avec environ 7000 qui avoisine le prix de 100 euros tout le reste est éparpiller juste derriere et quelque unes sont vers les 4000 euros la nuit
+
+
+## Distribution de la satisfaction
+
+```{r}
+p2 <- ggplot(airbnb %>% filter(!is.na(overall_satisfaction)), 
+             aes(x = overall_satisfaction)) +
+  geom_histogram(bins = 20, fill = "coral", color = "white", alpha = 0.8) +
+  labs(
+    title = "Distribution des notes de satisfaction",
+    subtitle = "Échelle de 0 à 5 étoiles",
+    x = "Note de satisfaction globale",
+    y = "Nombre de logements",
+    caption = paste("Moyenne :", round(mean(airbnb$overall_satisfaction, na.rm = TRUE), 2))
+  ) +
+  theme_minimal() +
+  scale_x_continuous(breaks = 0:5) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14)
+  )
+
+print(p2)
+```
+
+Là encore on a du mal a faire la distinction des minorités sur le diagramme mais ce qui est sur c'est qu'une extrême minorité des logements ont de trés mauvaises notes.
+
+Avec l'écrasente majorité des cas qui se situe entre 4 et 5 étoiles dans les avis leurs moyennes est vraiment bonne en générale.
+
+Cela pose la question : est ce que la note de satisfaction est vraiment un facteur qui afflue sur le prix si la majorité des logements ont une note excellente?
+
+## Distribution des types de logement
+
+```{r}
+p3 <- airbnb %>%
+  count(room_type) %>%
+  mutate(percentage = n / sum(n) * 100) %>%
+  ggplot(aes(x = reorder(room_type, n), y = n, fill = room_type)) +
+  geom_col(alpha = 0.8) +
+  geom_text(aes(label = paste0(n, "\n(", round(percentage, 1), "%)")), 
+            hjust = -0.1, size = 3.5) +
+  labs(
+    title = "Répartition des types de logement",
+    x = "Type de logement",
+    y = "Nombre de logements",
+    fill = "Type"
+  ) +
+  coord_flip() +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2") +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "none"
+  )
+
+print(p3)
+```
+
+Finalement on peut voire sur ce nouveau diagramme que 74% des airbnb sont des appartements à louer ce qui est en toute logique la base de leurs plateformes de vente.
+
+Avec un nombre minime de chambre partagé et quelques chambres privée encore une fois est ce que le type de chambre afflue sur le prix?
 
 # Analyse exploratoire bivariée
 
@@ -158,20 +225,21 @@ corr_long <- melt(corr_mat)
 ggplot(corr_long, aes(Var1, Var2, fill = value)) +
 geom_tile() +
 geom_text(aes(label = round(value, 2)))
-
 ```
 
-## Comparaison des prix selon des catégories (t-test, ANOVA)
+Au départ nous nous posions la question de la corrélations entre les variables. Et bien il extiste une matrice de corrélation qui peut mettre en exergue celle-ci.
 
-```{r}
-airbnb %>%
-  select(price, reviews, overall_satisfaction, bedrooms, bathrooms, accommodates) %>%
-  summary() %>%
-  kable(caption = "Statistiques descriptives des variables")
+Analysons étapes par étapes cette matrice:
 
-```
+-  En premier lieu nous voyons que la diagonale des croisements entre meme variables est toujour égale à 1 ce qui correspond à une corrélation parfaite
 
-## Visualisations : scatterplots, boxplots, heatmaps
+-  Ensuite nous voyons que les nombres assombries sont à faibles coefficients  voire des valeurs négatives donc de très faible corrélation
+
+-  Finalement on voit certaine cases avec des coéfficients assez haut comme ceux des chambres, salles de bains / toilettes et la capacité d'hébergement
+
+Maintenant que nous avons une idée des principales des variables numériques prenons un exemple et faisons une études pour le nombre de chambre qui parait assez évident
+
+## Visualisation : boite a moustache
 
 ```{r}
 ggplot(airbnb, aes(bedrooms, price)) +
@@ -181,7 +249,18 @@ ggplot(airbnb, aes(bedrooms, price)) +
 
 ```
 
+Comme on le voit bien ici la tendence montre que le prix augmente avec le nombre de chambre ce qui valide le lien de corrélationentre les deux
+
+On remarque aussi que ce graphique montre d'avantage les valeurs extrêmes comparé aux autres.
+
+\newpage
+
 # Modélisation
+
+Qu'est ce qu'une régréssion? 
+Une régression est une méthode statistique qui permet de modéliser la relation entre une variable à expliquer  et une ou plusieurs variables explicatives 
+
+Ce qui est exactement ce que l'on cherche à faire 
 
 ## Régression linéaire multiple
 
@@ -192,73 +271,44 @@ kable(tidy(model_lm), digits = 3,
 
 ```
 
+Analisons maintenant la régréssion qui nous dit:
+
+On voit pour chaque unité de variable ajouté qu'il y a une valeur ajouté en dollar au prix :
+
+-  8 dollar par unité de capacité en plus
+
+-  21.7 pour les salles de bains
+
+-  26 pour les chambres 
+
+
 ## Régression logarithmique
 
 ```{r}
 model_log <- lm(log(price) ~ reviews + overall_satisfaction + bedrooms + bathrooms + accommodates, data=airbnb)
 kable(tidy(model_log), digits = 3,
-      caption = "Résumé du modèle linéaire")
+      caption = "Résumé du modèle logarithmique")
 ```
+
+\newpage
 
 # Analyse géographique
 
-## Cartographie des prix par quartier ou coordonnées
+## Cartographie des prix par coordonnées
 
 ```{r}
 ggplot(airbnb, aes(longitude, latitude, color=price)) +
   geom_point(alpha=0.7) +
   scale_color_viridis_c() +
-  labs(title="Carte des prix Airbnb à Seattle")
+  labs(title="Carte des prix airbnb à Seattle")
 
 ```
 
-## Cartes de densité
 
-```{r}
-ggplot(airbnb, aes(longitude, latitude)) +
-  stat_density2d(geom="polygon", aes(fill=..level..), alpha=0.5) +
-  scale_fill_viridis_c() +
-  labs(title="Densité des logements Airbnb")
-
-```
-
-## Comparaison géographique des prix
-
-```{r}
-ggplot(airbnb, aes(longitude, latitude, size=price, color=overall_satisfaction)) +
-  geom_point(alpha=0.6) +
-  scale_color_viridis_c() +
-  labs(title="Satisfaction et prix selon la localisation")
-
-```
+\newpage
 
 # Interprétation et conclusions
 
 ## Facteurs influençant le prix
 
-```{r}
-summary(model_lm)
-
-```
-
-## Quartiers ou caractéristiques les plus chers/abordables
-
-```{r}
-quartier_stats <- airbnb %>%
-group_by(location) %>%
-summarise(
-prix_moyen = mean(price, na.rm = TRUE),
-nb_annonces = n()
-) %>%
-arrange(desc(prix_moyen)) %>%
-slice_head(n = 10)
-kable(quartier_stats)
-
-
-```
-
 ## Limites de l’analyse et recommandations
-
-```{r}
-
-```
